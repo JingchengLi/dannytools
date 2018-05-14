@@ -1,6 +1,8 @@
 package myredis
 
 import (
+	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -79,6 +81,9 @@ name addr flags role ping_sent ping_recv config_epoch link_status slots
 06934f9263df8e6292d2accecef2a6cabc5193a8 10.199.203.210:6683 slave 9fd094136d8ae049dcf8f8e4ff833015ce9186a9 0 1512612681090 13 connected
 2725ea3036cd2948d45d82fb8b192b91805b1fbb 10.201.42.179:8209 myself,master - 0 0 1 connected 6823-8191 [6823->-b73527c7435d8b104709dd644c39b0e06ffce96b]
 b73527c7435d8b104709dd644c39b0e06ffce96b 10.201.41.189:8219 myself,master - 0 0 30 connected [6823-<-2725ea3036cd2948d45d82fb8b192b91805b1fbb]
+
+cc6ef7526eb0fda69db23fcfe035d1218e8cca72 172.27.25.35:7003@17003 slave 2a1ada71bb3072fe746f1d73732cd8b094fb05c6 0 1526287370672 4 connected
+c5aa4190b7990f42ef5c0789f0b3405e97e6be99 172.27.25.35:7001@17001 master - 0 1526287370000 2 connected 5461-10922
 */
 // key = host:port
 func GetClusterNodesInfo(client *redis.ClusterClient) (map[string]*ClusterNodeInfo, error) {
@@ -89,6 +94,7 @@ func GetClusterNodesInfo(client *redis.ClusterClient) (map[string]*ClusterNodeIn
 	var (
 		ndInfo map[string]*ClusterNodeInfo = map[string]*ClusterNodeInfo{} // key = host:port
 		role   string                      = "master"
+		addReg *regexp.Regexp              = regexp.MustCompile(`^(\d+)`)
 	)
 
 	reStr = strings.TrimSpace(reStr)
@@ -100,6 +106,13 @@ func GetClusterNodesInfo(client *redis.ClusterClient) (map[string]*ClusterNodeIn
 			role = "slave"
 
 		}
+		tArr := strings.Split(arr[1], ":")
+		tStrArr := addReg.FindStringSubmatch(tArr[1])
+		if tStrArr == nil || len(tStrArr) <= 0 {
+			continue
+		}
+		arr[1] = fmt.Sprintf("%s:%s", tArr[0], tStrArr[0])
+		
 		iSent, _ := strconv.Atoi(arr[4])
 		iRecv, _ := strconv.Atoi(arr[5])
 		iEpoch, _ := strconv.Atoi(arr[6])
