@@ -445,6 +445,8 @@ func ParsePikaInfoKeyspace(result map[string]string, info *PikaInfoAll) {
 type PikaConfVar struct {
 	Maxmemory          uint64
 	TargetFileSizeBase uint64
+	Maxclients         uint64
+	//SlaveReadOnly      uint64
 }
 
 func GetPikaConfVars(client myredis.ClusterAndRedisClient, ifBreakOnErr bool) (PikaConfVar, error) {
@@ -463,6 +465,15 @@ func GetPikaConfVars(client myredis.ClusterAndRedisClient, ifBreakOnErr bool) (P
 		confVar.Maxmemory = tmpUint
 	}
 
+	tmpUint, err = client.GetRedisOneVarUint64("maxclients")
+	if err != nil {
+		if ifBreakOnErr {
+			return confVar, err
+		}
+	} else {
+		confVar.Maxclients = tmpUint
+	}
+
 	tmpUint, err = client.GetRedisOneVarUint64("target-file-size-base")
 	if err != nil {
 		if ifBreakOnErr {
@@ -471,6 +482,15 @@ func GetPikaConfVars(client myredis.ClusterAndRedisClient, ifBreakOnErr bool) (P
 	} else {
 		confVar.TargetFileSizeBase = tmpUint
 	}
-
+	/*
+		tmpUint, err = client.GetRedisOneVarUint64("slave-read-only")
+		if err != nil {
+			if ifBreakOnErr {
+				return confVar, err
+			}
+		} else {
+			confVar.SlaveReadOnly = tmpUint
+		}
+	*/
 	return confVar, nil
 }

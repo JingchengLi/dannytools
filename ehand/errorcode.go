@@ -1,8 +1,10 @@
 package ehand
 
 const (
-	NAME_ERRCODE = "errcode"
-	NAME_MSG     = "msg"
+	NAME_ERRCODE    = "errcode"
+	NAME_MSG        = "errmsg"
+	NAME_EXT_MSG    = "extramsg"
+	NAME_STACKTRACE = "stacktrace"
 
 	ERR_OK                 = 0
 	ERR_WARNING            = 1
@@ -65,6 +67,9 @@ const (
 	ERR_REDIS_EXPIRE         = 907
 	ERR_REDIS_CONFIG_GET     = 908
 	ERR_REDIS_CONFIG_SET     = 908
+	ERR_REDIS_SET            = 909
+	ERR_REDIS_TYPE           = 910
+	ERR_REDIS_DELETE         = 911
 
 	ERR_HTTP_GET  = 1001
 	ERR_HTTP_POST = 1002
@@ -96,4 +101,9 @@ const (
 	ERR_TWEMPROXY_CONNECT = 1600
 	ERR_TWEMPROXY_STATUS  = 1601
 	ERR_TWEMPROXY_PING    = 1602
+
+	ERR_KAFKA_CONNECT   = 1700
+	ERR_KAFKA_PARTITION = 1701
+	ERR_KAFKA_CLOSE     = 1702
+	ERR_KAFKA_CONSUMER  = 1703
 )

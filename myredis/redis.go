@@ -1,6 +1,7 @@
 package myredis
 
 import (
+	//"fmt"
 	"regexp"
 	"time"
 
@@ -14,12 +15,14 @@ type ConfRedis struct {
 	//Network  string // tcp|unix
 	Addr     string //host:port | socket
 	Database int    // db number
+	ReadOnly bool   // if read slave
 }
 
 func (this ConfRedis) setConfRedis(opt *redis.Options) {
 	this.setConfCommonRedis(opt)
 	opt.Addr = this.Addr
 	opt.DB = this.Database
+
 }
 
 func (this ConfRedis) CreateNewClientRedis() (*redis.Client, error) {
@@ -75,6 +78,7 @@ func ScanRedisKeys(client *redis.Client, scanCnt int64, matchRe *regexp.Regexp, 
 			} else {
 				keysChan <- k
 			}
+			//fmt.Printf("key: %s\n", k)
 		}
 		if cursor == 0 {
 			break

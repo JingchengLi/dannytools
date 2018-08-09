@@ -3,6 +3,7 @@ package ehand
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/go-errors/errors"
@@ -75,6 +76,18 @@ func CheckErrNoExtraMsgAlreadyStack(logWr *myLogger.Logger, err error, logFields
 func WithStackError(err error) error {
 	serr := errors.Errorf(err.Error())
 	return fmt.Errorf(serr.ErrorStack())
+}
+
+func CreateErrorWithStack(err error) error {
+	return fmt.Errorf("%s\n\t%s", err.Error(), string(debug.Stack()))
+}
+
+func CreateStrErrorWithStack(msg string) error {
+	return fmt.Errorf("%s\n\t%s", msg, string(debug.Stack()))
+}
+
+func CreateMsgWithStack(msg string) string {
+	return fmt.Sprintf("%s\n\t%s", msg, string(debug.Stack()))
 }
 
 func PanicWithExtraMsg(err error, fields map[string]interface{}, msg string) {

@@ -75,6 +75,42 @@ func (this ConfCluster) CreateNewClientCluster() (*redis.ClusterClient, error) {
 	}
 }
 
+func GetClusterNodesAddr(client *redis.ClusterClient) (map[string]RedisAddr, error) {
+	var (
+		err     error
+		results map[string]RedisAddr = map[string]RedisAddr{}
+		line    string
+		addReg  *regexp.Regexp = regexp.MustCompile(`^(\d+)`)
+		tmpInt  int64
+	)
+
+	reStr, err := client.ClusterNodes().Result()
+	if err != nil {
+		return nil, ehand.CreateErrorWithStack(err)
+	}
+	reStr = strings.TrimSpace(reStr)
+	for _, line = range strings.Split(reStr, "\n") {
+
+		arr := strings.Fields(line)
+
+		tArr := strings.Split(arr[1], ":")
+		if len(tArr) < 2 {
+			continue
+		}
+		tStrArr := addReg.FindStringSubmatch(tArr[1])
+		if tStrArr == nil || len(tStrArr) <= 0 {
+			continue
+		}
+		tmpInt, err = strconv.ParseInt(tStrArr[0], 10, 32)
+		if err != nil {
+			return nil, ehand.CreateErrorWithStack(err)
+		}
+		addr := RedisAddr{Host: tArr[0], Port: int(tmpInt)}
+		results[addr.AddrString()] = addr
+	}
+	return results, nil
+}
+
 /*
 name addr flags role ping_sent ping_recv config_epoch link_status slots
 37328e760f7c5ca1f0430cd59bb6fcae7099e3aa 10.199.203.210:6681 myself,master - 0 0 7 connected 2731-5460
@@ -99,6 +135,7 @@ func GetClusterNodesInfo(client *redis.ClusterClient) (map[string]*ClusterNodeIn
 
 	reStr = strings.TrimSpace(reStr)
 	for _, line := range strings.Split(reStr, "\n") {
+
 		arr := strings.Fields(line)
 		if arr[3] == "-" {
 			role = "master"
@@ -107,12 +144,15 @@ func GetClusterNodesInfo(client *redis.ClusterClient) (map[string]*ClusterNodeIn
 
 		}
 		tArr := strings.Split(arr[1], ":")
+		if len(tArr) != 2 {
+			continue
+		}
 		tStrArr := addReg.FindStringSubmatch(tArr[1])
 		if tStrArr == nil || len(tStrArr) <= 0 {
 			continue
 		}
 		arr[1] = fmt.Sprintf("%s:%s", tArr[0], tStrArr[0])
-		
+
 		iSent, _ := strconv.Atoi(arr[4])
 		iRecv, _ := strconv.Atoi(arr[5])
 		iEpoch, _ := strconv.Atoi(arr[6])

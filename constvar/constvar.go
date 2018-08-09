@@ -1,6 +1,7 @@
 package constvar
 
 const (
+	DATE_FORMAT                  = "2006-01-02"
 	DATETIME_FORMAT              = "2006-01-02 15:04:05"
 	DATETIME_FORMAT_NOSPACE      = "2006-01-02_15:04:05"
 	DATETIME_FORMAT_NOSPACE_FILE = "2006-01-02_15-04-05"

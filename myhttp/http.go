@@ -107,3 +107,19 @@ func JoinUrlPaths(urlStr, relativePath string) (string, error) {
 	}
 	return base.ResolveReference(rel).String(), nil
 }
+
+func BuildUrl(base string, params map[string]string) string {
+	if len(params) == 0 {
+		return base
+	}
+	p := ""
+	for k, v := range params {
+		if p == "" {
+			p = fmt.Sprintf("%s=%s", k, url.QueryEscape(v))
+		} else {
+			p = fmt.Sprintf("%s&%s=%s", p, k, url.QueryEscape(v))
+		}
+	}
+	//p = url.QueryEscape(p)
+	return fmt.Sprintf("%s?%s", base, p)
+}
